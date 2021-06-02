@@ -22,7 +22,7 @@ import cv2
 import segmentation_metrics as sm
 
 mask = cv2.imread("mask.png", cv2.IMREAD_GRAYSCALE)
-predicted_mask = cv2.imread("predicted_mask", cv2.IMREAD_GRAYSCALE)
+predicted_mask = cv2.imread("predicted_mask.png", cv2.IMREAD_GRAYSCALE)
 
 metrics = sm.calculate(
     masks=[mask],
