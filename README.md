@@ -1,4 +1,4 @@
-# Segmentation Metrics
+# Image Segmentation Metrics
 
 A python library to help you calculate:
 
