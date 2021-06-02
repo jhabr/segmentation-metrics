@@ -1,6 +1,6 @@
 # Image Segmentation Metrics
 
-A python library to help you calculate:
+A small python library to help you calculate:
 
 - TP (true positives)
 - TN (true negatives)
