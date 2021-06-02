@@ -52,5 +52,5 @@ Example Output (but not ☝ that one)️:
 }
 ```
 
-### Future Work
+## Future Work
 - Add support for multiclass segmentation metrics
