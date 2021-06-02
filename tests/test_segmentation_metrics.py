@@ -7,9 +7,6 @@ from segmentation_metrics.metrics import Metrics
 
 class SegmentationMetricsTests(unittest.TestCase):
 
-    def setUp(self):
-        self.metrics = Metrics()
-
     @property
     def mask(self):
         mask = np.array(
@@ -58,11 +55,8 @@ class SegmentationMetricsTests(unittest.TestCase):
         predicted_mask2 = np.expand_dims(predicted_mask2, axis=2)
         return predicted_mask2
 
-    def tearDown(self):
-        self.metrics = None
-
     def test_segmentation_metrics(self):
-        metrics = self.metrics.calculate(self.mask, self.predicted_mask)
+        metrics = Metrics.calculate([self.mask], [self.predicted_mask])
         self.assertEqual(metrics["n_images"], 1)
         self.assertEqual(metrics["n_true_positives"], 6)
         self.assertEqual(metrics["n_true_positives_%"], 0.6)
@@ -70,17 +64,15 @@ class SegmentationMetricsTests(unittest.TestCase):
         self.assertEqual(metrics["n_true_negatives_%"], 0.8)
         self.assertEqual(metrics["n_false_positives"], 3)
         self.assertEqual(metrics["n_false_negatives"], 4)
-        self.assertEqual(metrics["iou_score"], 0.46153846153846156)
         self.assertEqual(metrics["threshold_jaccard_index"], 0.0)
-        self.assertEqual(metrics["jaccard_similarity_index"], 0.46153846153846156)
+        self.assertEqual(metrics["jaccard_similarity_index (iou_score)"], 0.46153846153846156)
         self.assertEqual(metrics["dice"], 0.631578947368421)
-        self.assertEqual(metrics["f1_score"], 0.3157894736842105)
         self.assertEqual(metrics["sensitivity"], 0.6)
         self.assertEqual(metrics["specificity"], 0.8)
         self.assertEqual(metrics["accuracy"], 0.72)
 
     def test_segmentation_metrics_2(self):
-        metrics = self.metrics.calculate(self.mask2, self.predicted_mask2)
+        metrics = Metrics.calculate([self.mask2], [self.predicted_mask2])
         self.assertEqual(metrics["n_images"], 1)
         self.assertEqual(metrics["n_true_positives"], 9)
         self.assertEqual(metrics["n_true_positives_%"], 1.0)
@@ -88,19 +80,17 @@ class SegmentationMetricsTests(unittest.TestCase):
         self.assertEqual(metrics["n_true_negatives_%"], 1.0)
         self.assertEqual(metrics["n_false_positives"], 0)
         self.assertEqual(metrics["n_false_negatives"], 0)
-        self.assertEqual(metrics["iou_score"], 1.0)
         self.assertEqual(metrics["threshold_jaccard_index"], 1.0)
-        self.assertEqual(metrics["jaccard_similarity_index"], 1.0)
+        self.assertEqual(metrics["jaccard_similarity_index (iou_score)"], 1.0)
         self.assertEqual(metrics["dice"], 1.0)
-        self.assertEqual(metrics["f1_score"], 0.5)
         self.assertEqual(metrics["sensitivity"], 1.0)
         self.assertEqual(metrics["specificity"], 1.0)
         self.assertEqual(metrics["accuracy"], 1.0)
 
     def test_segmentation_metrics_batch(self):
-        masks = np.stack([self.mask, self.mask2])
-        predicted_masks = np.stack([self.predicted_mask, self.predicted_mask2])
-        metrics = self.metrics.calculate_batch(masks, predicted_masks)
+        masks = [self.mask, self.mask2]
+        predicted_masks = [self.predicted_mask, self.predicted_mask2]
+        metrics = Metrics.calculate(masks, predicted_masks)
         self.assertEqual(metrics["n_images"], 2)
         self.assertEqual(metrics["n_true_positives"], 15)
         self.assertEqual(metrics["n_true_positives_%"], 0.7894736842105263)
@@ -108,11 +98,9 @@ class SegmentationMetricsTests(unittest.TestCase):
         self.assertEqual(metrics["n_true_negatives_%"], 0.9032258064516129)
         self.assertEqual(metrics["n_false_positives"], 3)
         self.assertEqual(metrics["n_false_negatives"], 4)
-        self.assertEqual(metrics["iou_score"], 0.7307692307692308)
         self.assertEqual(metrics["threshold_jaccard_index"], 0.5)
-        self.assertEqual(metrics["jaccard_similarity_index"], 0.7307692307692308)
+        self.assertEqual(metrics["jaccard_similarity_index (iou_score)"], 0.7307692307692308)
         self.assertEqual(metrics["dice"], 0.8157894736842105)
-        self.assertEqual(metrics["f1_score"], 0.40789473684210525)
         self.assertEqual(metrics["sensitivity"], 0.8)
         self.assertEqual(metrics["specificity"], 0.9)
         self.assertEqual(metrics["accuracy"], 0.86)

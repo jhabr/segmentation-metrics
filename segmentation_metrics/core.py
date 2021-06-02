@@ -2,22 +2,44 @@ import numpy as np
 
 
 class BinarySegmentationMetrics:
+    """
+    This class is responsible for calculating simple metrics for one pair of ground truth mask and its predicted mask.
 
-    def __init__(self, jaccard_similarity_index_threshold=0.0):
+    :param jaccard_threshold: float
+        Threshold value for the jaccard index. Values below this value will be calculated as 0.
+
+    TP (true positives): pixels correctly segmented as foreground
+    TN (true negatives): pixels correctly detected as background
+    FP (false positives): pixels falsely segmented as foreground
+    FN (false negatives): pixels falsely detected as background
+    """
+
+    def __init__(self, jaccard_threshold: float = 0.0):
         self.n_mask_pixels = 0
         self.n_background_pixels = 0
-        self.true_positives = 0
-        self.true_negatives = 0
-        self.false_positives = 0
-        self.false_negatives = 0
-        self.iou_score = 0
-        self.jaccard_similarity_index_threshold = jaccard_similarity_index_threshold
+        self.tp = 0
+        self.tn = 0
+        self.fp = 0
+        self.fn = 0
+        self.jaccard_threshold = jaccard_threshold
 
-    def calculate(self, mask, predicted_mask):
-        self.__calculate_simple_metrics(mask, predicted_mask)
-        self.__calculate_iou(mask, predicted_mask)
+    def calculate(self, mask: np.ndarray, predicted_mask: np.ndarray) -> 'BinarySegmentationMetrics':
+        """
+        Calculate pixel-wise tp, tn, fp and fn.
 
-    def __calculate_simple_metrics(self, mask, predicted_mask):
+        :param mask: np.ndarray
+            The ground truth mask.
+        :param predicted_mask: np.ndarray
+            The predicted mask.
+        :return: BinarySegmentationMetrics
+            Update instance of BinarySegmentationMetrics
+        """
+        assert mask is not None and predicted_mask is not None, "Mask and predicted mask shall not be None."
+
+        self.__calculate_positives_negatives(mask, predicted_mask)
+        return self
+
+    def __calculate_positives_negatives(self, mask: np.ndarray, predicted_mask: np.ndarray):
         assert mask.shape == predicted_mask.shape
         assert len(mask.shape) == len(predicted_mask.shape) == 3
         # assert binary mask
@@ -31,7 +53,7 @@ class BinarySegmentationMetrics:
 
         height, width = mask.shape
 
-        true_positives, true_negatives, false_positives, false_negatives = 0, 0, 0, 0
+        tp, tn, fp, fn = 0, 0, 0, 0
 
         for i in range(height):
             for j in range(width):
@@ -39,97 +61,59 @@ class BinarySegmentationMetrics:
                 predicted_mask_pixel_value = predicted_mask[i][j]
                 if mask_pixel_value == predicted_mask_pixel_value:
                     if mask_pixel_value == 1:
-                        true_positives += 1
+                        tp += 1
                     else:
-                        true_negatives += 1
+                        tn += 1
                 else:
                     if predicted_mask_pixel_value == 0:
-                        false_negatives += 1
+                        fn += 1
                     else:
-                        false_positives += 1
+                        fp += 1
 
-        assert true_positives + \
-               true_negatives + \
-               false_positives + \
-               false_negatives == height * width
+        assert tp + tn + fp + fn == height * width, "Sum of all pixels is not equal to the resolutions of the image."
 
-        self.true_positives = true_positives
-        self.true_negatives = true_negatives
-        self.false_positives = false_positives
-        self.false_negatives = false_negatives
+        self.tp = tp
+        self.tn = tn
+        self.fp = fp
+        self.fn = fn
 
     @property
-    def tp(self):
-        """TP: pixels correctly segmented as foreground"""
-        return self.true_positives
-
-    @property
-    def tn(self):
-        """TN: pixels correctly detected as background"""
-        return self.true_negatives
-
-    @property
-    def fp(self):
-        """FP: pixels falsely segmented as foreground"""
-        return self.false_positives
-
-    @property
-    def fn(self):
-        """FN: pixels falsely detected as background"""
-        return self.false_negatives
-
-    def __calculate_iou(self, mask, predicted_mask):
-        intersection = np.logical_and(mask, predicted_mask)
-        union = np.logical_or(mask, predicted_mask)
-        self.iou_score = np.sum(intersection) / np.sum(union)
-
-    @property
-    def jaccard_similarity_index(self):
-        denominator = (self.tp + self.fn + self.fp)
+    def jaccard_similarity_index(self) -> float:
+        denominator = (self.tp + self.fp + self.fn)
         if denominator == 0:
             return 0
         return self.tp / denominator
 
     @property
-    def threshold_jaccard_index(self):
-        """
-        Based on https://clusteval.sdu.dk/1/clustering_quality_measures/7
-        """
-        if self.jaccard_similarity_index >= self.jaccard_similarity_index_threshold:
+    def threshold_jaccard_index(self) -> float:
+        if self.jaccard_similarity_index >= self.jaccard_threshold:
             return self.jaccard_similarity_index
         else:
             return 0.0
 
     @property
-    def dice(self):
+    def dice(self) -> float:
         denominator = (2 * self.tp + self.fn + self.fp)
         if denominator == 0:
             return 0
         return (2 * self.tp) / denominator
 
     @property
-    def f1_score(self):
-        denominator = (2 * self.tp + self.fn + self.fp)
-        if denominator == 0:
-            return 0
-        return self.tp / denominator
-
-    @property
-    def sensitivity(self):
+    def sensitivity(self) -> float:
         denominator = (self.tp + self.fn)
         if denominator == 0:
             return 0
         return self.tp / denominator
 
     @property
-    def specificity(self):
+    def specificity(self) -> float:
         denominator = (self.tn + self.fp)
         if denominator == 0:
             return 0
         return self.tn / denominator
 
     @property
-    def accuracy(self):
+    def accuracy(self) -> float:
         denominator = (self.tp + self.fp + self.tn + self.fn)
         if denominator == 0:
             return 0
