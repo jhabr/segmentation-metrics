@@ -23,7 +23,7 @@ class BinarySegmentationMetrics:
         self.fn = 0
         self.jaccard_threshold = jaccard_threshold
 
-    def calculate(self, mask: np.ndarray, predicted_mask: np.ndarray) -> 'BinarySegmentationMetrics':
+    def calculate(self, mask: np.ndarray, predicted_mask: np.ndarray):
         """
         Calculate pixel-wise tp, tn, fp and fn.
 
@@ -34,10 +34,9 @@ class BinarySegmentationMetrics:
         :return: BinarySegmentationMetrics
             Update instance of BinarySegmentationMetrics
         """
-        assert mask is not None and predicted_mask is not None, "Mask and predicted mask shall not be None."
+        assert mask is not None and predicted_mask is not None, "Mask and predicted mask must not be None."
 
         self.__calculate_positives_negatives(mask, predicted_mask)
-        return self
 
     def __calculate_positives_negatives(self, mask: np.ndarray, predicted_mask: np.ndarray):
         assert mask.shape == predicted_mask.shape
