@@ -1,4 +1,4 @@
-# Segmentation-Metrics
+# Segmentation Metrics
 
 A python library to help you calculate:
 
