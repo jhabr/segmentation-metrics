@@ -5,7 +5,7 @@ import numpy as np
 from segmentation_metrics.core import BinarySegmentationMetrics
 
 
-def calculate(masks: List[np.ndarray], predicted_masks: List[np.ndarray], jaccard_threshold=0.65) -> dict:
+def calculate(masks: List[np.ndarray], predicted_masks: List[np.ndarray], jaccard_threshold: float = 0.65) -> dict:
     """
     Calculates the metrics.
 
