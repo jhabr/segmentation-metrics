@@ -33,7 +33,7 @@ metrics = sm.calculate(
 print(metrics)
 ```
 
-Example Output (but not ☝ that one)️:
+Example Output:
 ```python
 {
     'n_images': 300,
